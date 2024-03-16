@@ -1,12 +1,4 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
-
-mongoose.set('strictQuery', false);
-console.log('connecting to', process.env.TEST_MONGODB_URI);
-mongoose
-  .connect(process.env.TEST_MONGODB_URI)
-  .then((result) => console.log('connected to MongoDB'))
-  .catch((error) => console.log('error connectin to MongoDB: ', error.message));
 
 const postSchema = new mongoose.Schema({
   title: {
@@ -14,6 +6,11 @@ const postSchema = new mongoose.Schema({
     required: true,
   },
   content: String,
+  comments: [String],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 postSchema.set('toJSON', {
