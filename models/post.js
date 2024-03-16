@@ -9,7 +9,10 @@ mongoose
   .catch((error) => console.log('error connectin to MongoDB: ', error.message));
 
 const postSchema = new mongoose.Schema({
-  title: String,
+  title: {
+    type: String,
+    required: true,
+  },
   content: String,
 });
 
