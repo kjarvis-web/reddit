@@ -1,11 +1,11 @@
 const postsRouter = require('express').Router();
 const Post = require('../models/post');
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
-postsRouter.get('/', (request, response) => {
-  Post.find({}).then((posts) => {
-    response.json(posts);
-  });
+postsRouter.get('/', async (request, response) => {
+  const posts = await Post.find({}).populate('user', { username: 1, name: 1 });
+  response.json(posts);
 });
 
 postsRouter.get('/:id', (request, response, next) => {
@@ -20,10 +20,22 @@ postsRouter.get('/:id', (request, response, next) => {
     .catch((error) => next(error));
 });
 
+// Token auth
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
+
 postsRouter.post('/', async (request, response, next) => {
   const { body } = request;
-
-  const user = await User.findById(body.userId);
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+  const user = await User.findById(decodedToken.id);
 
   if (body.title === undefined) {
     return response.status(400).json({ error: 'title missing' });
@@ -34,13 +46,6 @@ postsRouter.post('/', async (request, response, next) => {
     content: body.content,
     user: user.id,
   });
-
-  //   post
-  //     .save()
-  //     .then((savedPost) => {
-  //       response.json(savedPost);
-  //     })
-  //     .catch((error) => next(error));
 
   const savedPost = await post.save();
   user.posts = user.posts.concat(savedPost._id);
