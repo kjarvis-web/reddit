@@ -1,7 +1,8 @@
 const postsRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Post = require('../models/post');
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
   const posts = await Post.find({}).populate('user', { username: 1, name: 1 });
@@ -45,6 +46,7 @@ postsRouter.post('/', async (request, response, next) => {
     title: body.title,
     content: body.content,
     user: user.id,
+    comments: [],
   });
 
   const savedPost = await post.save();
@@ -62,16 +64,32 @@ postsRouter.delete('/:id', (request, response, next) => {
     .catch((error) => next(error));
 });
 
-postsRouter.put('/:id', (request, response, next) => {
-  const { body } = request;
+// postsRouter.put('/:id', (request, response, next) => {
+//   const { body } = request;
 
-  const post = { title: body.title, content: body.content };
+//   const post = { title: body.title, content: body.content, comments: body.comment };
 
-  Post.findByIdAndUpdate(request.params.id, post, { new: true })
-    .then((updatedPost) => {
-      response.json(updatedPost);
-    })
-    .catch((error) => next(error));
+//   Post.findByIdAndUpdate(request.params.id, post, { new: true })
+//     .then((updatedPost) => {
+//       response.json(updatedPost);
+//     })
+//     .catch((error) => next(error));
+// });
+
+// add comments
+postsRouter.put('/:id/comments', async (request, response, next) => {
+  const { comment } = request.body;
+  const { id } = request.params;
+  try {
+    const thread = await Post.findById(id);
+    thread.comments = thread.comments.concat(comment);
+    const updatedThread = await thread.save();
+    response.status(201).json(updatedThread);
+  } catch (error) {
+    console.log('router comments error');
+    logger.info(error);
+    next(error);
+  }
 });
 
 module.exports = postsRouter;
