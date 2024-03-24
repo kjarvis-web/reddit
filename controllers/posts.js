@@ -6,13 +6,15 @@ const Comment = require('../models/comment');
 const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
-  const posts = await Post.find({}).populate({
-    path: 'comments',
-    populate: {
-      path: 'user',
-      select: 'username',
-    },
-  });
+  const posts = await Post.find({})
+    .populate('user', { username: 1, name: 1 })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'username',
+      },
+    });
 
   response.json(posts);
 });
