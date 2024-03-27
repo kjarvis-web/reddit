@@ -13,8 +13,22 @@ commentsRouter.get('/', (request, response, next) => {
     .catch((error) => next(error));
 });
 
+commentsRouter.get('/:c_id', async (request, response, next) => {
+  const comment = await Comment.findById(request.params.c_id);
+  response.json(comment);
+});
+
 commentsRouter.post('/:c_id', async (request, response, next) => {
   const comment = await Comment.findById(request.params.c_id);
+
+  const newComment = new Comment({
+    text: request.body.comment,
+  });
+
+  const savedComment = await newComment.save();
+  comment.comments = comment.comments.concat(savedComment);
+  await comment.save();
+  response.status(201).json(savedComment);
 });
 
 module.exports = commentsRouter;
