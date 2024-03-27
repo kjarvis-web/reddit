@@ -13,7 +13,7 @@ const commentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  originalId: {
+  parentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
   },
@@ -22,7 +22,7 @@ const commentSchema = new mongoose.Schema({
 
 commentSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
+    returnedObject.c_id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
   },

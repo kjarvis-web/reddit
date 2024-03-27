@@ -6,22 +6,13 @@ const Comment = require('../models/comment');
 const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
-  const posts = await Post.find({})
-    .populate('user', { username: 1, name: 1 })
-    .populate({
-      path: 'comments',
-      populate: {
-        path: 'user',
-        select: 'username',
-      },
-    });
+  const posts = await Post.find({}).populate('user', { username: 1, name: 1 }).populate('comments');
 
   response.json(posts);
 });
 
 postsRouter.get('/:id', (request, response, next) => {
   Post.findById(request.params.id)
-    .populate('comments', { text: 1, user: 1 })
     .then((post) => {
       if (post) {
         response.json(post);
@@ -123,7 +114,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     const newComment = new Comment({
       text: comment,
       user: user.id,
-      originalId: post.id,
+      parentId: post.id,
     });
 
     // save comment
@@ -143,5 +134,34 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     next(error);
   }
 });
+
+// postsRouter.get('/:id/comments', (request, response, next) => {
+//   Comment.find({})
+//     .populate('user', { username: 1 })
+//     .then((comment) => {
+//       if (comment) {
+//         response.json(comment);
+//       } else {
+//         response.status(404).end();
+//       }
+//     })
+//     .catch((error) => next(error));
+// });
+
+postsRouter.get('/:id/comments', async (request, response, next) => {
+  const posts = await Post.findById(request.params.id)
+    .populate('comments')
+    .populate('user', { username: 1 })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'username',
+      },
+    });
+
+  response.json(posts);
+});
+
 
 module.exports = postsRouter;
