@@ -6,7 +6,8 @@ const Comment = require('../models/comment');
 const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
-  const posts = await Post.find({}).populate('user', { username: 1, name: 1 }).populate('comments');
+  // const posts = await Post.find({}).populate('user', { username: 1, name: 1 }).populate('comments');
+  const posts = await Post.find({}).populate('comments');
 
   response.json(posts);
 });
@@ -162,6 +163,5 @@ postsRouter.get('/:id/comments', async (request, response, next) => {
 
   response.json(posts);
 });
-
 
 module.exports = postsRouter;

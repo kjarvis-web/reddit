@@ -17,13 +17,15 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post',
   },
-  comments: [this],
+  comments: [{ type: {} }],
+  // comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  // need to build seperate schema for replies using linked lists
 });
 
 commentSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.c_id = returnedObject._id.toString();
-    delete returnedObject._id;
+    // returnedObject.c_id = returnedObject._id.toString();
+    // delete returnedObject._id;
     delete returnedObject.__v;
   },
 });
