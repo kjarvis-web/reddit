@@ -1,42 +1,46 @@
 const commentsRouter = require('express').Router();
+const jwt = require('jsonwebtoken');
 const Comment = require('../models/comment');
-const Post = require('../models/post');
-const { LinkedList, Node } = require('../models/linkedlist');
+const User = require('../models/user');
 
 commentsRouter.get('/', async (request, response, next) => {
-  const comments = await Comment.find({});
+  const comments = await Comment.find({}).populate('comments').populate('user');
   response.json(comments);
 });
 
-commentsRouter.get('/:_id', async (request, response, next) => {
-  const comment = await Comment.findById(request.params._id);
+commentsRouter.get('/:id', async (request, response, next) => {
+  const comment = await Comment.findById(request.params.id);
+
   response.json(comment);
 });
 
-commentsRouter.post('/:_id', async (request, response, next) => {
-  const comment = await Comment.findById(request.params._id);
-  console.log(comment);
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization');
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '');
+  }
+  return null;
+};
+
+commentsRouter.post('/:id', async (request, response, next) => {
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+
+  const user = await User.findById(decodedToken.id);
+
+  const comment = await Comment.findById(request.params.id);
 
   const newComment = new Comment({
     text: request.body.comment,
+    parentId: request.params.id,
+    user: user.id,
   });
 
   const savedComment = await newComment.save();
   comment.comments = comment.comments.concat(savedComment);
   await comment.save();
-  response.status(201).json(savedComment);
-});
-
-commentsRouter.post('/', async (request, response, next) => {
-  const { id } = request.params;
-  const { text } = request.body;
-  const post = await Post.findById(id);
-  const node = new Node({ text });
-  await node.save();
-  const newComment = new LinkedList({
-    head: node,
-  });
-  const savedComment = await newComment.save();
   response.status(201).json(savedComment);
 });
 

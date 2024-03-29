@@ -6,8 +6,12 @@ const Comment = require('../models/comment');
 const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
-  // const posts = await Post.find({}).populate('user', { username: 1, name: 1 }).populate('comments');
-  const posts = await Post.find({}).populate('comments');
+  const posts = await Post.find({})
+    .populate('user', { username: 1, name: 1 })
+    .populate({
+      path: 'comments',
+      populate: { path: 'user' },
+    });
 
   response.json(posts);
 });
@@ -67,34 +71,6 @@ postsRouter.delete('/:id', (request, response, next) => {
     .catch((error) => next(error));
 });
 
-// postsRouter.put('/:id', (request, response, next) => {
-//   const { body } = request;
-
-//   const post = { title: body.title, content: body.content, comments: body.comment };
-
-//   Post.findByIdAndUpdate(request.params.id, post, { new: true })
-//     .then((updatedPost) => {
-//       response.json(updatedPost);
-//     })
-//     .catch((error) => next(error));
-// });
-
-// add comments for [string]
-// postsRouter.post('/:id/comments', async (request, response, next) => {
-//   const { comment } = request.body;
-//   const { id } = request.params;
-
-//   try {
-//     const thread = await Post.findById(id);
-//     thread.comments = thread.comments.concat(comment);
-//     const updatedThread = await thread.save();
-//     response.status(201).json(updatedThread);
-//   } catch (error) {
-//     logger.info(error);
-//     next(error);
-//   }
-// });
-
 postsRouter.post('/:id/comments', async (request, response, next) => {
   const { comment } = request.body;
   const { id } = request.params;
@@ -135,19 +111,6 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     next(error);
   }
 });
-
-// postsRouter.get('/:id/comments', (request, response, next) => {
-//   Comment.find({})
-//     .populate('user', { username: 1 })
-//     .then((comment) => {
-//       if (comment) {
-//         response.json(comment);
-//       } else {
-//         response.status(404).end();
-//       }
-//     })
-//     .catch((error) => next(error));
-// });
 
 postsRouter.get('/:id/comments', async (request, response, next) => {
   const posts = await Post.findById(request.params.id)
