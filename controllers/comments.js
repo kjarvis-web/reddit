@@ -32,10 +32,14 @@ commentsRouter.post('/:id', async (request, response, next) => {
 
   const comment = await Comment.findById(request.params.id);
 
+  if (!request.body.comment) {
+    return response.status(400).json({ error: 'comment missing' });
+  }
+
   const newComment = new Comment({
     text: request.body.comment,
     parentId: request.params.id,
-    user: user.id,
+    username: user.username,
   });
 
   const savedComment = await newComment.save();

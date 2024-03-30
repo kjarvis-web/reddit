@@ -11,6 +11,11 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  username: String,
+  created: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 postSchema.set('toJSON', {
@@ -18,6 +23,11 @@ postSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
+    returnedObject.created = new Date(returnedObject.created).toLocaleDateString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   },
 });
 

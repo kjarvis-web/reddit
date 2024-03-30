@@ -87,11 +87,16 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     // get post id
     const post = await Post.findById(id);
 
+    if (!comment) {
+      return response.status(400).json({ error: 'no comment' });
+    }
+
     // create comment
     const newComment = new Comment({
       text: comment,
       user: user.id,
       parentId: post.id,
+      username: user.username,
     });
 
     // save comment
