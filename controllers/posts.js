@@ -48,12 +48,16 @@ postsRouter.post('/', async (request, response, next) => {
   if (body.title === undefined) {
     return response.status(400).json({ error: 'title missing' });
   }
+  if (body.content === undefined) {
+    return response.status(400).json({ error: 'content missing' });
+  }
 
   const post = new Post({
     title: body.title,
     content: body.content,
     user: user.id,
     comments: [],
+    likes: 0,
   });
 
   const savedPost = await post.save();
@@ -79,7 +83,6 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     return response.status(401).json({ error: 'token invalid' });
   }
 
- 
   try {
     // get user
 
