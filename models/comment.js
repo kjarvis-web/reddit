@@ -18,12 +18,11 @@ const commentSchema = new mongoose.Schema({
   },
   parentId: String,
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-  // need to build seperate schema for replies using linked lists
 });
 
 commentSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
+    returnedObject.id = returnedObject._id;
     delete returnedObject._id;
     delete returnedObject.__v;
     returnedObject.date = new Date(returnedObject.date).toLocaleDateString('en-US', {

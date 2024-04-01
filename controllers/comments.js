@@ -9,7 +9,7 @@ commentsRouter.get('/', async (request, response, next) => {
 });
 
 commentsRouter.get('/:id', async (request, response, next) => {
-  const comment = await Comment.findById(request.params.id);
+  const comment = await Comment.findById(request.params.id).populate('comments').populate('user');
 
   response.json(comment);
 });
@@ -19,7 +19,6 @@ const getTokenFrom = (request) => {
   if (authorization && authorization.startsWith('Bearer ')) {
     return authorization.replace('Bearer ', '');
   }
-  console.log('here');
   return null;
 };
 
@@ -30,6 +29,7 @@ commentsRouter.post('/:id', async (request, response, next) => {
   }
 
   const user = await User.findById(decodedToken.id);
+  console.log(user);
 
   const comment = await Comment.findById(request.params.id);
 
@@ -40,11 +40,18 @@ commentsRouter.post('/:id', async (request, response, next) => {
   const newComment = new Comment({
     text: request.body.comment,
     parentId: request.params.id,
-    username: user.username,
+    // username: user.username,
+    user,
   });
 
+  // comment to comment
   const savedComment = await newComment.save();
   comment.comments = comment.comments.concat(savedComment);
+
+  // add comment to the corresponding user and saves to db
+  user.comments = user.comments.concat(savedComment);
+  await user.save();
+
   await comment.save();
   response.status(201).json(savedComment);
 });

@@ -40,7 +40,9 @@ const getTokenFrom = (request) => {
 // post thread
 postsRouter.post('/', async (request, response, next) => {
   const { body } = request;
+  console.log(request.get('authorization'));
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  console.log(request.get('authorization'));
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
@@ -73,13 +75,14 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   const { comment } = request.body;
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  console.log(decodedToken);
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
   try {
     // get user
     const user = await User.findById(decodedToken.id);
-
+    console.log(user);
     // get post id
     const post = await Post.findById(id);
 
@@ -90,9 +93,9 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     // create comment
     const newComment = new Comment({
       text: comment,
-      user: user.id,
+      user,
       parentId: post.id,
-      username: user.username,
+      // username: user.username,
     });
 
     // save comment
@@ -142,10 +145,6 @@ postsRouter.put('/:id', async (request, response, next) => {
   const { body } = request;
   const { id } = request.params;
   const post = {
-    title: body.title,
-    content: body.content,
-    user: body.user,
-    comments: body.comments,
     likes: body.likes,
   };
   try {
