@@ -12,7 +12,7 @@ const commentSchema = new mongoose.Schema({
     ref: 'User',
   },
   username: String,
-  created: {
+  date: {
     type: Date,
     default: Date.now,
   },
@@ -26,7 +26,7 @@ commentSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
-    returnedObject.created = new Date(returnedObject.created).toLocaleDateString('en-US', {
+    returnedObject.date = new Date(returnedObject.date).toLocaleDateString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,

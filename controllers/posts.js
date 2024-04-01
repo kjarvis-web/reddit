@@ -37,6 +37,7 @@ const getTokenFrom = (request) => {
   return null;
 };
 
+// post thread
 postsRouter.post('/', async (request, response, next) => {
   const { body } = request;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
@@ -67,14 +68,7 @@ postsRouter.post('/', async (request, response, next) => {
   response.status(201).json(savedPost);
 });
 
-postsRouter.delete('/:id', (request, response, next) => {
-  Post.findByIdAndDelete(request.params.id)
-    .then((result) => {
-      response.status(204).end();
-    })
-    .catch((error) => next(error));
-});
-
+// post original comment
 postsRouter.post('/:id/comments', async (request, response, next) => {
   const { comment } = request.body;
   const { id } = request.params;
@@ -82,10 +76,8 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
-
   try {
     // get user
-
     const user = await User.findById(decodedToken.id);
 
     // get post id
@@ -121,6 +113,15 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   }
 });
 
+postsRouter.delete('/:id', (request, response, next) => {
+  Post.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
+});
+
+// get only comments
 postsRouter.get('/:id/comments', async (request, response, next) => {
   const posts = await Post.findById(request.params.id)
     .populate('comments')
@@ -134,6 +135,25 @@ postsRouter.get('/:id/comments', async (request, response, next) => {
     });
 
   response.json(posts);
+});
+
+// update likes
+postsRouter.put('/:id', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const post = {
+    title: body.title,
+    content: body.content,
+    user: body.user,
+    comments: body.comments,
+    likes: body.likes,
+  };
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    response.json(updatedPost);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = postsRouter;
