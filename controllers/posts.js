@@ -61,6 +61,7 @@ postsRouter.post('/', async (request, response, next) => {
     user: user.id,
     comments: [],
     likes: 0,
+    voted: [],
   });
 
   const savedPost = await post.save();
@@ -75,7 +76,6 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   const { comment } = request.body;
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
-  console.log(decodedToken);
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
@@ -95,6 +95,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
       text: comment,
       user,
       parentId: post.id,
+      likes: 0,
       // username: user.username,
     });
 
@@ -144,8 +145,47 @@ postsRouter.get('/:id/comments', async (request, response, next) => {
 postsRouter.put('/:id', async (request, response, next) => {
   const { body } = request;
   const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  const user = await User.findById(decodedToken.id);
   const post = {
     likes: body.likes,
+    voted: user,
+  };
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    response.json(updatedPost);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postsRouter.put('/:id/upvote', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  const user = await User.findById(decodedToken.id);
+  const post = {
+    likes: body.likes,
+    upVotes: user,
+    downVotes: body.downVotes,
+  };
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    response.json(updatedPost);
+  } catch (error) {
+    next(error);
+  }
+});
+
+postsRouter.put('/:id/downvote', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  const user = await User.findById(decodedToken.id);
+  const post = {
+    likes: body.likes,
+    upVotes: body.upVotes,
+    downVotes: user,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });

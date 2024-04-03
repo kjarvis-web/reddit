@@ -29,7 +29,6 @@ commentsRouter.post('/:id', async (request, response, next) => {
   }
 
   const user = await User.findById(decodedToken.id);
-  console.log(user);
 
   const comment = await Comment.findById(request.params.id);
 
@@ -54,6 +53,44 @@ commentsRouter.post('/:id', async (request, response, next) => {
 
   await comment.save();
   response.status(201).json(savedComment);
+});
+
+// upvote
+commentsRouter.put('/:id/upvote', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  const user = await User.findById(decodedToken.id);
+  const comment = {
+    likes: body.likes,
+    upVotes: user,
+    downVotes: body.downVotes,
+  };
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
+    response.json(updatedComment);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// downvote
+commentsRouter.put('/:id/downvote', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  const user = await User.findById(decodedToken.id);
+  const comment = {
+    likes: body.likes,
+    downVotes: user,
+    upVotes: body.upVotes,
+  };
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
+    response.json(updatedComment);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = commentsRouter;

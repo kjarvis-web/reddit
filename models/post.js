@@ -18,6 +18,14 @@ const postSchema = new mongoose.Schema({
   },
   likes: Number,
   created: { type: Number, default: Date.now },
+  // voted: [
+  //   {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     ref: 'User',
+  //   },
+  // ],
+  upVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  downVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 });
 
 postSchema.set('toJSON', {

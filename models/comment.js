@@ -11,13 +11,16 @@ const commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  username: String,
   date: {
     type: Date,
     default: Date.now,
   },
   parentId: String,
   comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+  likes: Number,
+  upVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  downVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  created: { type: Number, default: Date.now },
 });
 
 commentSchema.set('toJSON', {
