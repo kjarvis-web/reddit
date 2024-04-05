@@ -41,6 +41,7 @@ commentsRouter.post('/:id', async (request, response, next) => {
     parentId: request.params.id,
     // username: user.username,
     user,
+    likes: 0,
   });
 
   // comment to comment

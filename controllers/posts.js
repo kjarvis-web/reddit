@@ -166,7 +166,7 @@ postsRouter.put('/:id/upvote', async (request, response, next) => {
   const user = await User.findById(decodedToken.id);
   const post = {
     likes: body.likes,
-    upVotes: user,
+    upVotes: body.upVotes,
     downVotes: body.downVotes,
   };
   try {
@@ -185,7 +185,7 @@ postsRouter.put('/:id/downvote', async (request, response, next) => {
   const post = {
     likes: body.likes,
     upVotes: body.upVotes,
-    downVotes: user,
+    downVotes: body.downVotes,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
