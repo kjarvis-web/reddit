@@ -168,6 +168,7 @@ postsRouter.put('/:id/upvote', async (request, response, next) => {
     likes: body.likes,
     upVotes: body.upVotes,
     downVotes: body.downVotes,
+    user,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
@@ -186,6 +187,7 @@ postsRouter.put('/:id/downvote', async (request, response, next) => {
     likes: body.likes,
     upVotes: body.upVotes,
     downVotes: body.downVotes,
+    user,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });

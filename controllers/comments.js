@@ -62,10 +62,12 @@ commentsRouter.put('/:id/upvote', async (request, response, next) => {
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   const user = await User.findById(decodedToken.id);
+  console.log(id);
   const comment = {
     likes: body.likes,
-    upVotes: user,
+    upVotes: body.upVotes,
     downVotes: body.downVotes,
+    user,
   };
   try {
     const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
@@ -81,10 +83,12 @@ commentsRouter.put('/:id/downvote', async (request, response, next) => {
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   const user = await User.findById(decodedToken.id);
+  console.log(id);
   const comment = {
     likes: body.likes,
-    downVotes: user,
+    downVotes: body.downVotes,
     upVotes: body.upVotes,
+    user,
   };
   try {
     const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
