@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
       ref: 'Comment',
     },
   ],
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 userSchema.set('toJSON', {
@@ -29,6 +33,11 @@ userSchema.set('toJSON', {
     delete returnedObject._id;
     delete returnedObject.__v;
     delete returnedObject.passwordHash;
+    returnedObject.date = new Date(returnedObject.date).toLocaleDateString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    });
   },
 });
 
