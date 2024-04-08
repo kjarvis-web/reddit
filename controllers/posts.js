@@ -117,7 +117,12 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   }
 });
 
+// delete post
 postsRouter.delete('/:id', (request, response, next) => {
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
   Post.findByIdAndDelete(request.params.id)
     .then((result) => {
       response.status(204).end();
@@ -141,15 +146,17 @@ postsRouter.get('/:id/comments', async (request, response, next) => {
   response.json(posts);
 });
 
-// update likes
+// edit post
 postsRouter.put('/:id', async (request, response, next) => {
   const { body } = request;
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
-  const user = await User.findById(decodedToken.id);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+  // const user = await User.findById(decodedToken.id);
   const post = {
-    likes: body.likes,
-    voted: user,
+    content: body.content,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });

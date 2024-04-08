@@ -24,7 +24,7 @@ const postSchema = new mongoose.Schema({
 
 postSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
+    returnedObject.id = returnedObject._id;
     delete returnedObject._id;
     delete returnedObject.__v;
     returnedObject.date = new Date(returnedObject.date).toLocaleDateString('en-US', {
