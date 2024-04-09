@@ -125,10 +125,12 @@ commentsRouter.put('/:id', async (request, response, next) => {
     text: body.text,
     removed: body.removed,
     user,
-    edited: body.edited
+    edited: body.edited,
   };
   try {
-    const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
+    const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true }).populate(
+      'user'
+    );
     response.json(updatedComment);
   } catch (error) {
     next(error);
