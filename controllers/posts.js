@@ -157,13 +157,14 @@ postsRouter.put('/:id', async (request, response, next) => {
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
-  // const user = await User.findById(decodedToken.id);
+  const user = await User.findById(decodedToken.id);
   const post = {
     content: body.content,
     edited: body.edited,
+    user,
   };
   try {
-    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true }).populate('user');
     response.json(updatedPost);
   } catch (error) {
     next(error);
