@@ -62,6 +62,8 @@ postsRouter.post('/', async (request, response, next) => {
     comments: [],
     likes: 0,
     voted: [],
+    removed: false,
+    edited: false,
   });
 
   const savedPost = await post.save();
@@ -82,7 +84,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
   try {
     // get user
     const user = await User.findById(decodedToken.id);
-    console.log(user);
+
     // get post id
     const post = await Post.findById(id);
 
@@ -96,7 +98,8 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
       user,
       parentId: post.id,
       likes: 0,
-      // username: user.username,
+      removed: false,
+      edited: false,
     });
 
     // save comment
@@ -157,6 +160,7 @@ postsRouter.put('/:id', async (request, response, next) => {
   // const user = await User.findById(decodedToken.id);
   const post = {
     content: body.content,
+    edited: body.edited,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });

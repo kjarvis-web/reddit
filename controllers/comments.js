@@ -98,4 +98,41 @@ commentsRouter.put('/:id/downvote', async (request, response, next) => {
   }
 });
 
+// delete comment
+commentsRouter.delete('/:id', (request, response, next) => {
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+  console.log(request.params.id);
+  Comment.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
+});
+
+// edit comment text
+commentsRouter.put('/:id', async (request, response, next) => {
+  const { body } = request;
+  const { id } = request.params;
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: 'token invalid' });
+  }
+  const user = await User.findById(decodedToken.id);
+  const comment = {
+    text: body.text,
+    removed: body.removed,
+    user,
+    edited: body.edited
+  };
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
+    response.json(updatedComment);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = commentsRouter;

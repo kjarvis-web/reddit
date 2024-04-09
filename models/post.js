@@ -20,6 +20,8 @@ const postSchema = new mongoose.Schema({
   created: { type: Number, default: Date.now },
   upVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   downVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  removed: Boolean,
+  edited: Boolean,
 });
 
 postSchema.set('toJSON', {

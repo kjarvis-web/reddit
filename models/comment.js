@@ -21,6 +21,8 @@ const commentSchema = new mongoose.Schema({
   upVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   downVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   created: { type: Number, default: Date.now },
+  removed: Boolean,
+  edited: Boolean,
 });
 
 commentSchema.set('toJSON', {
