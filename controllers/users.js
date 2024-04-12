@@ -21,18 +21,28 @@ usersRouter.post('/', async (request, response) => {
 
 usersRouter.get('/', async (request, response) => {
   const users = await User.find({})
-    .populate('posts', {
-      title: 1,
-      content: 1,
-      created: 1,
-      date: 1,
-    })
-    .populate('comments', {
-      text: 1,
-      parentId: 1,
-      created: 1,
-      date: 1,
-    });
+    .populate(
+      'posts'
+      // {
+      //   title: 1,
+      //   content: 1,
+      //   created: 1,
+      //   date: 1,
+      //   upVotes: 1,
+      //   downVotes: 1,
+      // }
+    )
+    .populate(
+      'comments'
+      // {
+      //   text: 1,
+      //   parentId: 1,
+      //   created: 1,
+      //   date: 1,
+      //   upVotes: 1,
+      //   downVotes: 1,
+      // }
+    );
   response.json(users);
 });
 

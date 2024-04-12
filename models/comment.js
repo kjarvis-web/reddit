@@ -23,6 +23,7 @@ const commentSchema = new mongoose.Schema({
   created: { type: Number, default: Date.now },
   removed: Boolean,
   edited: Boolean,
+  thread: String,
 });
 
 commentSchema.set('toJSON', {

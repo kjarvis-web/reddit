@@ -48,11 +48,8 @@ postsRouter.post('/', async (request, response, next) => {
   }
   const user = await User.findById(decodedToken.id);
 
-  if (body.title === undefined) {
+  if (body.title === undefined || !body.title) {
     return response.status(400).json({ error: 'title missing' });
-  }
-  if (body.content === undefined) {
-    return response.status(400).json({ error: 'content missing' });
   }
 
   const post = new Post({
@@ -100,6 +97,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
       likes: 0,
       removed: false,
       edited: false,
+      thread: request.body.thread,
     });
 
     // save comment

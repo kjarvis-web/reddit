@@ -42,10 +42,12 @@ commentsRouter.post('/:id', async (request, response, next) => {
     // username: user.username,
     user,
     likes: 0,
+    thread: request.body.thread,
   });
 
   // comment to comment
   const savedComment = await newComment.save();
+
   comment.comments = comment.comments.concat(savedComment);
 
   // add comment to the corresponding user and saves to db
