@@ -72,19 +72,21 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
     voted: [],
     removed: false,
     edited: false,
-    file: file.path,
+    file: file && file.path,
   });
 
   const savedPost = await post.save();
   user.posts = user.posts.concat(savedPost._id);
   await user.save();
 
-  const image = new Img({
-    threadId: savedPost._id,
-    filename: savedPost.file,
-  });
+  if (savedPost.file) {
+    const image = new Img({
+      threadId: savedPost._id,
+      filename: savedPost.file,
+    });
 
-  await image.save();
+    await image.save();
+  }
 
   response.status(201).json(savedPost);
 });
