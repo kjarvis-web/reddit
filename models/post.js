@@ -22,6 +22,7 @@ const postSchema = new mongoose.Schema({
   downVotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   removed: Boolean,
   edited: Boolean,
+  file: Buffer,
 });
 
 postSchema.set('toJSON', {

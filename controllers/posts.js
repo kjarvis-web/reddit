@@ -1,8 +1,10 @@
 const postsRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 const Post = require('../models/post');
 const User = require('../models/user');
 const Comment = require('../models/comment');
+const Img = require('../models/image');
 const logger = require('../utils/logger');
 
 postsRouter.get('/', async (request, response) => {
@@ -38,11 +40,20 @@ const getTokenFrom = (request) => {
 };
 
 // post thread
-postsRouter.post('/', async (request, response, next) => {
-  const { body } = request;
-  console.log(request.get('authorization'));
+const storage = multer.diskStorage({
+  destination(request, file, cb) {
+    return cb(null, './uploads');
+  },
+  filename(request, file, cb) {
+    return cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+postsRouter.post('/', upload.single('file'), async (request, response, next) => {
+  const { body, file } = request;
+
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
-  console.log(request.get('authorization'));
+
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
@@ -61,11 +72,19 @@ postsRouter.post('/', async (request, response, next) => {
     voted: [],
     removed: false,
     edited: false,
+    file: file.path,
   });
 
   const savedPost = await post.save();
   user.posts = user.posts.concat(savedPost._id);
   await user.save();
+
+  const image = new Img({
+    threadId: savedPost._id,
+    filename: savedPost.file,
+  });
+
+  await image.save();
 
   response.status(201).json(savedPost);
 });
