@@ -1,9 +1,9 @@
 const postsRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const multerS3 = require('multer-s3');
 const config = require('../utils/config');
 const Post = require('../models/post');
 const User = require('../models/user');
@@ -52,15 +52,30 @@ const getTokenFrom = (request) => {
 };
 
 // post thread
-const storage = multer.diskStorage({
-  destination(request, file, cb) {
-    return cb(null, './uploads');
-  },
-  filename(request, file, cb) {
-    return cb(null, `${Date.now()}_${file.originalname}`);
-  },
+// const storage = multer.diskStorage({
+//   destination(request, file, cb) {
+//     return cb(null, './uploads');
+//   },
+//   filename(request, file, cb) {
+//     return cb(null, `${Date.now()}_${file.originalname}`);
+//   },
+// });
+const upload = multer({
+  storage: multerS3({
+    s3,
+    bucket: config.BUCKET_NAME,
+    metadata(req, file, cb) {
+      cb(null, { filedName: file.fieldname });
+    },
+    key(req, file, cb) {
+      console.log(file);
+      cb(null, Date.now().toString());
+    },
+    location(req, file, cb) {
+      cb(null, { location: file.location });
+    },
+  }),
 });
-const upload = multer({ storage });
 postsRouter.post('/', upload.single('file'), async (request, response, next) => {
   const { body, file } = request;
 
@@ -91,26 +106,25 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
   user.posts = user.posts.concat(savedPost._id);
   await user.save();
 
-  if (savedPost.file) {
+  if (file) {
     // s3
     const randomImageName = () => crypto.randomBytes(32).toString('hex');
     const imageName = randomImageName();
-    const params = {
-      Bucket: config.BUCKET_NAME,
-      Key: imageName,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    };
-    const command = new PutObjectCommand(params);
-    await s3.send(command);
+    // const params = {
+    //   Bucket: config.BUCKET_NAME,
+    //   Key: imageName,
+    //   Body: file.buffer,
+    //   ContentType: file.mimetype,
+    // };
+    // const command = new PutObjectCommand(params);
+    // await s3.send(command);
 
     // mongo
     const image = new Img({
       threadId: savedPost._id,
       filename: imageName,
+      url: file.location,
     });
-
-    console.log(file);
 
     await image.save();
   }
