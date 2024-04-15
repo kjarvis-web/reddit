@@ -1,11 +1,23 @@
 const postsRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const crypto = require('crypto');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const config = require('../utils/config');
 const Post = require('../models/post');
 const User = require('../models/user');
 const Comment = require('../models/comment');
 const Img = require('../models/image');
 const logger = require('../utils/logger');
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: config.AWS_ACCESS_KEY_ID,
+    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+  },
+  region: config.BUCKET_REGION,
+});
 
 postsRouter.get('/', async (request, response) => {
   const posts = await Post.find({})
@@ -80,10 +92,25 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
   await user.save();
 
   if (savedPost.file) {
+    // s3
+    const randomImageName = () => crypto.randomBytes(32).toString('hex');
+    const imageName = randomImageName();
+    const params = {
+      Bucket: config.BUCKET_NAME,
+      Key: imageName,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+
+    // mongo
     const image = new Img({
       threadId: savedPost._id,
-      filename: savedPost.file,
+      filename: imageName,
     });
+
+    console.log(file);
 
     await image.save();
   }
