@@ -225,6 +225,7 @@ postsRouter.put('/:id', async (request, response, next) => {
     content: body.content,
     edited: body.edited,
     user,
+    author: body.author,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true }).populate('user');
@@ -247,7 +248,7 @@ postsRouter.put('/:id/upvote', async (request, response, next) => {
     user,
     author: body.author,
   };
-  console.log('post', post);
+
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
     response.json(updatedPost);
@@ -269,7 +270,7 @@ postsRouter.put('/:id/downvote', async (request, response, next) => {
     user,
     author: body.author,
   };
-  console.log('down', post);
+
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
     response.json(updatedPost);
