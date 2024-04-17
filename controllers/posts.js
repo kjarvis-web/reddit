@@ -25,7 +25,8 @@ postsRouter.get('/', async (request, response) => {
     .populate({
       path: 'comments',
       populate: { path: 'user' },
-    });
+    })
+    .populate('author');
 
   response.json(posts);
 });
@@ -94,6 +95,7 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
     title: body.title,
     content: body.content,
     user: user.id,
+    author: user,
     comments: [],
     likes: 0,
     voted: [],
@@ -160,6 +162,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
       removed: false,
       edited: false,
       thread: request.body.thread,
+      author: request.body.author,
     });
 
     // save comment
@@ -231,6 +234,7 @@ postsRouter.put('/:id', async (request, response, next) => {
   }
 });
 
+// upvote post
 postsRouter.put('/:id/upvote', async (request, response, next) => {
   const { body } = request;
   const { id } = request.params;
@@ -241,7 +245,9 @@ postsRouter.put('/:id/upvote', async (request, response, next) => {
     upVotes: body.upVotes,
     downVotes: body.downVotes,
     user,
+    author: body.author,
   };
+  console.log('post', post);
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
     response.json(updatedPost);
@@ -250,6 +256,7 @@ postsRouter.put('/:id/upvote', async (request, response, next) => {
   }
 });
 
+// downvote post
 postsRouter.put('/:id/downvote', async (request, response, next) => {
   const { body } = request;
   const { id } = request.params;
@@ -260,7 +267,9 @@ postsRouter.put('/:id/downvote', async (request, response, next) => {
     upVotes: body.upVotes,
     downVotes: body.downVotes,
     user,
+    author: body.author,
   };
+  console.log('down', post);
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
     response.json(updatedPost);

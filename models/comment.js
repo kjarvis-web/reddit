@@ -24,6 +24,10 @@ const commentSchema = new mongoose.Schema({
   removed: Boolean,
   edited: Boolean,
   thread: String,
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
 commentSchema.set('toJSON', {

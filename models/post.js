@@ -11,7 +11,6 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
-  username: String,
   date: {
     type: Date,
     default: Date.now,
@@ -23,6 +22,7 @@ const postSchema = new mongoose.Schema({
   removed: Boolean,
   edited: Boolean,
   file: Buffer,
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
 postSchema.set('toJSON', {

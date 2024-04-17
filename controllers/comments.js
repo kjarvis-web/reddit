@@ -9,7 +9,10 @@ commentsRouter.get('/', async (request, response, next) => {
 });
 
 commentsRouter.get('/:id', async (request, response, next) => {
-  const comment = await Comment.findById(request.params.id).populate('comments').populate('user');
+  const comment = await Comment.findById(request.params.id)
+    .populate('comments')
+    .populate('user')
+    .populate('author');
 
   response.json(comment);
 });
@@ -39,10 +42,10 @@ commentsRouter.post('/:id', async (request, response, next) => {
   const newComment = new Comment({
     text: request.body.comment,
     parentId: request.params.id,
-    // username: user.username,
     user,
     likes: 0,
     thread: request.body.thread,
+    author: request.body.author,
   });
 
   // comment to comment
@@ -64,12 +67,13 @@ commentsRouter.put('/:id/upvote', async (request, response, next) => {
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   const user = await User.findById(decodedToken.id);
-  console.log(id);
+
   const comment = {
     likes: body.likes,
     upVotes: body.upVotes,
     downVotes: body.downVotes,
     user,
+    author: body.author,
   };
   try {
     const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
@@ -85,12 +89,13 @@ commentsRouter.put('/:id/downvote', async (request, response, next) => {
   const { id } = request.params;
   const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
   const user = await User.findById(decodedToken.id);
-  console.log(id);
+
   const comment = {
     likes: body.likes,
     downVotes: body.downVotes,
     upVotes: body.upVotes,
     user,
+    author: body.author,
   };
   try {
     const updatedComment = await Comment.findByIdAndUpdate(id, comment, { new: true });
@@ -106,7 +111,7 @@ commentsRouter.delete('/:id', (request, response, next) => {
   if (!decodedToken.id) {
     return response.status(401).json({ error: 'token invalid' });
   }
-  console.log(request.params.id);
+
   Comment.findByIdAndDelete(request.params.id)
     .then((result) => {
       response.status(204).end();
