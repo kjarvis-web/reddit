@@ -25,8 +25,7 @@ postsRouter.get('/', async (request, response) => {
     .populate({
       path: 'comments',
       populate: { path: 'user' },
-    })
-    .populate('author');
+    });
 
   response.json(posts);
 });
