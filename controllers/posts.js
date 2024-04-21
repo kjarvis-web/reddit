@@ -64,11 +64,11 @@ const upload = multer({
   storage: multerS3({
     s3,
     bucket: config.BUCKET_NAME,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata(req, file, cb) {
       cb(null, { filedName: file.fieldname });
     },
     key(req, file, cb) {
-      console.log(file);
       cb(null, Date.now().toString());
     },
     location(req, file, cb) {
@@ -224,7 +224,6 @@ postsRouter.put('/:id', async (request, response, next) => {
     content: body.content,
     edited: body.edited,
     user,
-    author: body.author,
   };
   try {
     const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true }).populate('user');
