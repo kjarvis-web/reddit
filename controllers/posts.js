@@ -32,17 +32,6 @@ postsRouter.get('/', async (request, response) => {
   response.json(posts);
 });
 
-// postsRouter.get('/', async (request, response) => {
-//   const posts = await Post.find({})
-//     .populate('user', { username: 1, name: 1 })
-//     .populate({
-//       path: 'comments',
-//       populate: { path: 'user' },
-//     });
-
-//   response.json(posts);
-// });
-
 // get total docs
 postsRouter.get('/total', async (request, response) => {
   const total = await Post.countDocuments({});
@@ -54,20 +43,6 @@ postsRouter.get('/:id', async (request, response) => {
   response.json(post);
 });
 
-// postsRouter.get('/:id', (request, response, next) => {
-//   Post.findById(request.params.id)
-//     .then((post) => {
-//       if (post) {
-//         const postIndex = Post.find({}).indexOf(request.params.id);
-//         const pageNumber = Math.floor(postIndex / PAGE_SIZE);
-//         response.json(post);
-//       } else {
-//         response.status(404).end();
-//       }
-//     })
-//     .catch((error) => next(error));
-// });
-
 // Token auth
 const getTokenFrom = (request) => {
   const authorization = request.get('authorization');
@@ -78,14 +53,6 @@ const getTokenFrom = (request) => {
 };
 
 // post thread
-// const storage = multer.diskStorage({
-//   destination(request, file, cb) {
-//     return cb(null, './uploads');
-//   },
-//   filename(request, file, cb) {
-//     return cb(null, `${Date.now()}_${file.originalname}`);
-//   },
-// });
 const upload = multer({
   storage: multerS3({
     s3,
