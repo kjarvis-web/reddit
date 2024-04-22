@@ -1,7 +1,7 @@
 const postsRouter = require('express').Router();
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client } = require('@aws-sdk/client-s3');
 const crypto = require('crypto');
 const multerS3 = require('multer-s3');
 const config = require('../utils/config');
@@ -18,10 +18,10 @@ const s3 = new S3Client({
   },
   region: config.BUCKET_REGION,
 });
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 postsRouter.get('/', async (request, response) => {
   const { page = 0 } = request.query;
-  const total = await Post.countDocuments({});
+
   const posts = await Post.find({}, null, { skip: Number(page) * PAGE_SIZE, limit: PAGE_SIZE })
     .populate('user', { username: 1, name: 1 })
     .populate({
@@ -29,8 +29,19 @@ postsRouter.get('/', async (request, response) => {
       populate: { path: 'user' },
     });
 
-  response.json({ total: Math.ceil(total / PAGE_SIZE), posts });
+  response.json(posts);
 });
+
+// postsRouter.get('/', async (request, response) => {
+//   const posts = await Post.find({})
+//     .populate('user', { username: 1, name: 1 })
+//     .populate({
+//       path: 'comments',
+//       populate: { path: 'user' },
+//     });
+
+//   response.json(posts);
+// });
 
 // get total docs
 postsRouter.get('/total', async (request, response) => {
@@ -38,17 +49,24 @@ postsRouter.get('/total', async (request, response) => {
   response.json({ total: Math.ceil(total / PAGE_SIZE) });
 });
 
-postsRouter.get('/:id', (request, response, next) => {
-  Post.findById(request.params.id)
-    .then((post) => {
-      if (post) {
-        response.json(post);
-      } else {
-        response.status(404).end();
-      }
-    })
-    .catch((error) => next(error));
+postsRouter.get('/:id', async (request, response) => {
+  const post = await Post.findById(request.params.id);
+  response.json(post);
 });
+
+// postsRouter.get('/:id', (request, response, next) => {
+//   Post.findById(request.params.id)
+//     .then((post) => {
+//       if (post) {
+//         const postIndex = Post.find({}).indexOf(request.params.id);
+//         const pageNumber = Math.floor(postIndex / PAGE_SIZE);
+//         response.json(post);
+//       } else {
+//         response.status(404).end();
+//       }
+//     })
+//     .catch((error) => next(error));
+// });
 
 // Token auth
 const getTokenFrom = (request) => {
@@ -119,14 +137,6 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
     // s3
     const randomImageName = () => crypto.randomBytes(32).toString('hex');
     const imageName = randomImageName();
-    // const params = {
-    //   Bucket: config.BUCKET_NAME,
-    //   Key: imageName,
-    //   Body: file.buffer,
-    //   ContentType: file.mimetype,
-    // };
-    // const command = new PutObjectCommand(params);
-    // await s3.send(command);
 
     // mongo
     const image = new Img({
@@ -182,7 +192,7 @@ postsRouter.post('/:id/comments', async (request, response, next) => {
     // add comment to post and save to db
     post.comments = post.comments.concat(savedComment);
     await post.save();
-    console.log(savedComment);
+
     response.status(201).json(savedComment);
   } catch (error) {
     logger.info(error);
