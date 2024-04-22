@@ -18,16 +18,24 @@ const s3 = new S3Client({
   },
   region: config.BUCKET_REGION,
 });
-
+const PAGE_SIZE = 5;
 postsRouter.get('/', async (request, response) => {
-  const posts = await Post.find({})
+  const { page = 0 } = request.query;
+  const total = await Post.countDocuments({});
+  const posts = await Post.find({}, null, { skip: Number(page) * PAGE_SIZE, limit: PAGE_SIZE })
     .populate('user', { username: 1, name: 1 })
     .populate({
       path: 'comments',
       populate: { path: 'user' },
     });
 
-  response.json(posts);
+  response.json({ total: Math.ceil(total / PAGE_SIZE), posts });
+});
+
+// get total docs
+postsRouter.get('/total', async (request, response) => {
+  const total = await Post.countDocuments({});
+  response.json({ total: Math.ceil(total / PAGE_SIZE) });
 });
 
 postsRouter.get('/:id', (request, response, next) => {
