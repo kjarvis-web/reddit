@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-// const bodyParser = require('body-parser');
+
 const config = require('./utils/config');
 
 const app = express();
@@ -35,8 +35,6 @@ app.use('/api/posts', postsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/comments', commentsRouter);
-// app.use(bodyParser.json({ limit: '16mb', extended: true }));
-// app.use(bodyParser.urlencoded({ limit: '16mb', extended: true }));
 app.use('/uploads', express.static('uploads'));
 app.use('/api/images', imageRouter);
 

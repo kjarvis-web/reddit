@@ -19,6 +19,12 @@ const s3 = new S3Client({
   region: config.BUCKET_REGION,
 });
 const PAGE_SIZE = 10;
+
+postsRouter.get('/all', async (request, response) => {
+  const posts = await Post.find({}).populate('user').populate('comments');
+  response.json(posts);
+});
+
 postsRouter.get('/', async (request, response) => {
   const { page = 0 } = request.query;
 
@@ -38,6 +44,7 @@ postsRouter.get('/total', async (request, response) => {
   response.json({ total: Math.ceil(total / PAGE_SIZE) });
 });
 
+// get specific post
 postsRouter.get('/:id', async (request, response) => {
   const post = await Post.findById(request.params.id);
   response.json(post);
@@ -101,14 +108,10 @@ postsRouter.post('/', upload.single('file'), async (request, response, next) => 
   await user.save();
 
   if (file) {
-    // s3
-    const randomImageName = () => crypto.randomBytes(32).toString('hex');
-    const imageName = randomImageName();
-
     // mongo
     const image = new Img({
       threadId: savedPost._id,
-      filename: imageName,
+      filename: file.originalname,
       url: file.location,
     });
 
