@@ -18,7 +18,7 @@ const s3 = new S3Client({
   },
   region: config.BUCKET_REGION,
 });
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 postsRouter.get('/all', async (request, response) => {
   const posts = await Post.find({}).populate('user').populate('comments');
@@ -33,7 +33,8 @@ postsRouter.get('/', async (request, response) => {
     .populate({
       path: 'comments',
       populate: { path: 'user' },
-    });
+    })
+    .sort({ created: -1 });
 
   response.json(posts);
 });
