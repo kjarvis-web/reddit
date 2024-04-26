@@ -28,7 +28,10 @@ postsRouter.get('/all', async (request, response) => {
 postsRouter.get('/', async (request, response) => {
   const { page = 0 } = request.query;
 
-  const posts = await Post.find({}, null, { skip: Number(page) * PAGE_SIZE, limit: PAGE_SIZE })
+  const posts = await Post.find({}, null, {
+    skip: page > 0 ? parseInt(page, 10) * PAGE_SIZE : 0,
+    limit: PAGE_SIZE,
+  })
     .populate('user', { username: 1, name: 1 })
     .populate({
       path: 'comments',
